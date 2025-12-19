@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('showPerGbMonth')) {
         document.getElementById('showPerGbMonth').addEventListener('change', updatePreview);
     }
+    if (document.getElementById('showSignature')) {
+        document.getElementById('showSignature').addEventListener('change', updatePreview);
+    }
     // Initial preview update
     updatePreview();
 });
@@ -179,6 +182,13 @@ function updatePreview() {
     } else {
         document.getElementById('previewTotal').textContent = '$' + totalDisplay;
     }
+    
+    // Show/hide signature field
+    var signatureField = document.getElementById('signatureField');
+    var showSignature = document.getElementById('showSignature') && document.getElementById('showSignature').checked;
+    if (signatureField) {
+        signatureField.style.display = showSignature ? 'block' : 'none';
+    }
 }
 
 function downloadPDF() {
@@ -221,7 +231,7 @@ function downloadPDF() {
         try {
             const opt = {
                 margin: [0, 0, 0, 0],
-                filename: `quote-${document.getElementById('quoteNumber').value || 'document'}.pdf`,
+                filename: `${document.getElementById('quoteNumber').value || 'document'}.pdf`,
                 image: { type: 'jpeg', quality: 0.95 },
                 html2canvas: { 
                     scale: 2,
