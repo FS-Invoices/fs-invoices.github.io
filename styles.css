@@ -1,3 +1,5 @@
+/* DO NOT FORMAT */
+
 * {
     margin: 0;
     padding: 0;
@@ -452,7 +454,7 @@ body {
     right: 0;
     bottom: 0;
     margin-right: 60px;
-    margin-bottom: 95px;
+    margin-bottom: 70px;
     text-align: right;
     background: transparent;
     border-top: none;
@@ -460,11 +462,16 @@ body {
     padding-top: 0;
 }
 
+.asign {
+    margin-top: 15px;
+}
+
 .footer-left {
     text-align: left;
 }
 .terms {
     opacity: 30%;
+    text-align: right;
 }
 
 .quote-main .terms {
