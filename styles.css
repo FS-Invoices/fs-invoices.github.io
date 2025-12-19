@@ -182,15 +182,17 @@ body {
     width: 100%;
     overflow: visible;
     position: relative;
+    /* Remove extra bottom padding to eliminate white space */
+    padding-bottom: 0;
 }
 
 .quote-layout {
     display: flex;
     width: 8.5in;
-    margin: 0 auto;
+    margin: 0;
     background: white;
     position: relative;
-    height: 10.5in;
+    height: 10.9in;
 }
 
 /* Left Sidebar */
@@ -351,12 +353,13 @@ body {
     color: #999;
     font-style: italic;
     padding: 30px !important;
+    
 }
 
 .quote-totals {
     margin-top: auto;
-    margin-bottom: 40px;
-    text-align: right;
+    margin-bottom: 10px;
+    text-align: left;
 }
 
 .total-row {
@@ -364,20 +367,19 @@ body {
     font-size: 14px;
     color: #000;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: 20px;
 }
 
 .total-row span:first-child {
-    min-width: 100px;
-    text-align: center;
+    text-align: left;
 }
 
 .total-row.tax-note {
     font-size: 12px;
     color: #666;
     margin-bottom: 15px;
-    justify-content: flex-end;
+    
 }
 
 .total-row.tax-note span {
@@ -389,7 +391,7 @@ body {
     font-weight: 700;
     margin-top: 10px;
     padding-top: 15px;
-    border-top: 1px solid #ddd;
+   
 }
 
 .total-row.total-final span:first-child {
@@ -398,6 +400,10 @@ body {
 
 .total-row.total-final span:last-child {
     font-size: 18px;
+}
+
+.total-row.tax-note {
+    justify-content: flex-start !important;
 }
 
 .rate-period {
@@ -415,10 +421,58 @@ body {
     border-top: 1px solid #eee;
 }
 
+.quote-sidebar .quote-footer {
+    flex-direction: column;
+    color: white;
+    border-top: 1px solid #555;
+    font-size: 12px;
+}
+
+.quote-sidebar .footer-left,
+.quote-sidebar .footer-right {
+    text-align: left;
+    margin-bottom: 8px;
+}
+
+.quote-sidebar .terms {
+    opacity: 0.7;
+}
+
+.quote-sidebar .terms a {
+    color: white;
+}
+
+#signatureField {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 12px;
+    color: #000;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    margin-right: 60px;
+    margin-bottom: 95px;
+    text-align: right;
+    background: transparent;
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+}
+
 .footer-left {
     text-align: left;
 }
+.terms {
+    opacity: 30%;
+}
 
+.quote-main .terms {
+    opacity: 1;
+    font-size: 12px;
+    color: #666;
+    margin-top: 10px;
+}
 .footer-right {
     text-align: right;
 }
@@ -435,6 +489,7 @@ body {
     
     .quote-sidebar {
         width: 100%;
+        height: 100%;
     }
     
     .quote-main {
