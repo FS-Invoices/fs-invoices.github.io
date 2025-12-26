@@ -14,12 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('expirationDate').addEventListener('input', updatePreview);
     document.getElementById('recipientInfo').addEventListener('input', updatePreview);
     document.getElementById('includeTax').addEventListener('change', updatePreview);
-    if (document.getElementById('showPerGbMonth')) {
-        document.getElementById('showPerGbMonth').addEventListener('change', updatePreview);
-    }
-    if (document.getElementById('showSignature')) {
-        document.getElementById('showSignature').addEventListener('change', updatePreview);
-    }
+    
     // Initial preview update
     updatePreview();
 });
@@ -30,15 +25,17 @@ function addItem() {
     itemRow.className = 'item-row';
     itemRow.innerHTML = `
         <input type="text" class="item-description" placeholder="Name" oninput="updatePreview()">
-        <input type="number" class="item-quantity" placeholder="QTY" min="0" step="0.01" oninput="updatePreview()">
-        <input type="number" class="item-price" placeholder="Rate" min="0.01" step="0.01" oninput="updatePreview()">
-        <select class="item-period" onchange="updatePreview()">
-            <option value="">One-time</option>
+        <input type="text" class="item-quantity" placeholder="QTY" inputmode="decimal" oninput="updatePreview()">
+        <select class="item-qty-unit" onchange="updatePreview()">
+            <option value="">None</option>
             <option value="GBs">GBs</option>
-            <option value="GBs /month">GBs /month</option>
-            <option value="/month">/month</option>
-            <option value="GBs /year">GBs /year</option>
-            <option value="/year">/year</option>
+            <option value="TBs">TBs</option>
+        </select>
+        <input type="text" class="item-price" placeholder="Rate" inputmode="decimal" oninput="updatePreview()">
+        <select class="item-display-mode" onchange="updatePreview()">
+            <option value="number">calc</option>
+            <option value="tbd">TBD</option>
+            <option value="tier1">Tier 1</option>
         </select>
         <button type="button" class="remove-item" onclick="removeItem(this)">×</button>
     `;
@@ -72,17 +69,17 @@ function formatCurrency(amount, period = '') {
 }
 
 function formatRate(amount, period = '') {
+    // Format rate with GBs suffix
     const rateValue = parseFloat(amount || 0);
     if (rateValue === 0) return '$0';
+    
+    // Show 2 decimal places for rates
     const formatted = '$' + rateValue.toFixed(2);
-    let firstLine = formatted;
-    let secondLine = '';
-    if (period === 'per GB/month') {
-        secondLine = '<span class="rate-period">per GB/month</span>';
-    } else if (period === '/month') {
-        secondLine = '<span class="rate-period">/month</span>';
+    let result = formatted + ' <span class="rate-period"></span>';
+    if (period) {
+        result += ' <span class="rate-period">' + period + '</span>';
     }
-    return firstLine + (secondLine ? '<br>' + secondLine : '');
+    return result;
 }
 
 function updatePreview() {
@@ -109,12 +106,10 @@ function updatePreview() {
     previewItems.innerHTML = '';
     
     let subtotal = 0;
-    let hasMonthlyItems = false;
     
     if (itemRows.length === 0) {
         previewItems.innerHTML = '<tr><td colspan="4" class="empty-message">No items added</td></tr>';
     } else {
-        const showPerGbMonth = document.getElementById('showPerGbMonth') ? document.getElementById('showPerGbMonth').checked : true;
         itemRows.forEach(row => {
             const description = row.querySelector('.item-description').value;
             const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
@@ -127,23 +122,46 @@ function updatePreview() {
                 priceInput.value = 0.01;
             }
             
-            const period = row.querySelector('.item-period').value || '';
-            const total = quantity * price;
-            subtotal += total;
+            const qtyUnit = row.querySelector('.item-qty-unit')?.value || '';
+            const period = '/month'; // Always use /month
+            const displayMode = row.querySelector('.item-display-mode')?.value || 'number';
             
-            if (period === '/month' || period === 'per GB/month') {
-                hasMonthlyItems = true;
+            // Calculate total based on display mode
+            let total = 0;
+            if (displayMode === 'number') {
+                total = quantity * price;
+                subtotal += total;
+            } else if (displayMode === 'tier1') {
+                total = 199;
+                subtotal += total;
             }
-            if (description || quantity || price) {
+            // If TBD, total stays 0 and not added to subtotal
+            
+            if (description || quantity || price || displayMode === 'tier1') {
                 const tr = document.createElement('tr');
-                const rateValue = price > 0 ? price : 0;
-                // Use new formatRate
-                const rateDisplay = formatRate(rateValue, period);
+                
+                // Display based on mode
+                let qtyDisplay, rateDisplay, amountDisplay;
+                
+                if (displayMode === 'tier1') {
+                    qtyDisplay = (Math.round(quantity) || '-') + (qtyUnit ? ' <span class="qty-unit">' + qtyUnit + '</span>' : '');
+                    rateDisplay = 'Tier 1';
+                    amountDisplay = formatCurrency(199) + ' <span class="rate-period">/month</span>';
+                } else if (displayMode === 'tbd') {
+                    qtyDisplay = (Math.round(quantity) || '-') + (qtyUnit ? ' <span class="qty-unit">' + qtyUnit + '</span>' : '');
+                    rateDisplay = formatRate(price > 0 ? price : 0, period);
+                    amountDisplay = 'TBD';
+                } else {
+                    qtyDisplay = (Math.round(quantity) || '-') + (qtyUnit ? ' <span class="qty-unit">' + qtyUnit + '</span>' : '');
+                    rateDisplay = formatRate(price > 0 ? price : 0, period);
+                    amountDisplay = formatCurrency(total) + ' <span class="rate-period">/month</span>';
+                }
+                
                 tr.innerHTML = `
                     <td>${description || '-'}</td>
-                    <td>${Math.round(quantity)}</td>
+                    <td>${qtyDisplay}</td>
                     <td>${rateDisplay}</td>
-                    <td>${formatCurrency(total)}</td>
+                    <td>${amountDisplay}</td>
                 `;
                 previewItems.appendChild(tr);
             }
@@ -165,7 +183,7 @@ function updatePreview() {
     }
     
     // Update totals
-    const totalPeriod = hasMonthlyItems ? '/month' : '';
+    const totalPeriod = ' /month'; // Always show /month
     // Round to 2 decimal places for display
     const subtotalValue = Math.round(subtotal * 100) / 100;
     const totalValue = Math.round(subtotal * 100) / 100;
@@ -181,13 +199,6 @@ function updatePreview() {
             ' <span class="rate-period">' + totalPeriod + '</span>';
     } else {
         document.getElementById('previewTotal').textContent = '$' + totalDisplay;
-    }
-    
-    // Show/hide signature field
-    var signatureField = document.getElementById('signatureField');
-    var showSignature = document.getElementById('showSignature') && document.getElementById('showSignature').checked;
-    if (signatureField) {
-        signatureField.style.display = showSignature ? 'block' : 'none';
     }
 }
 
@@ -227,11 +238,14 @@ function downloadPDF() {
     element.style.position = 'relative';
     
     // Wait a moment for rendering
+    // Enable export mode to remove padding/borders
+    document.body.classList.add('pdf-mode');
+
     setTimeout(function() {
         try {
             const opt = {
-                margin: [0, 0, 0, 0],
-                filename: `${document.getElementById('quoteNumber').value || 'document'}.pdf`,
+                margin: 0,
+                filename: `quote-${document.getElementById('quoteNumber').value || 'document'}.pdf`,
                 image: { type: 'jpeg', quality: 0.95 },
                 html2canvas: { 
                     scale: 2,
@@ -240,8 +254,7 @@ function downloadPDF() {
                     backgroundColor: '#ffffff',
                     letterRendering: true,
                     allowTaint: false,
-                    scrollX: 0,
-                    scrollY: 0,
+                    scrollY: 0
                 },
                 jsPDF: { 
                     unit: 'in', 
@@ -258,6 +271,7 @@ function downloadPDF() {
                 element.style.position = originalStyles.position;
                 element.style.width = originalStyles.width;
                 element.style.height = originalStyles.height;
+                document.body.classList.remove('pdf-mode');
                 
                 if (downloadBtn) {
                     downloadBtn.textContent = originalText;
@@ -273,6 +287,7 @@ function downloadPDF() {
                 element.style.position = originalStyles.position;
                 element.style.width = originalStyles.width;
                 element.style.height = originalStyles.height;
+                document.body.classList.remove('pdf-mode');
                 
                 alert('Error generating PDF: ' + (error.message || 'Unknown error. Please check the browser console for details.'));
                 
@@ -291,6 +306,7 @@ function downloadPDF() {
             element.style.position = originalStyles.position;
             element.style.width = originalStyles.width;
             element.style.height = originalStyles.height;
+            document.body.classList.remove('pdf-mode');
             
             if (downloadBtn) {
                 downloadBtn.textContent = originalText;

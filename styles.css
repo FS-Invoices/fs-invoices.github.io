@@ -330,7 +330,7 @@ body {
     font-size: 14px;
     color: #000;
     border-bottom: none;
-    vertical-align: middle;
+    vertical-align: top;
 }
 
 .items-table tbody tr {
@@ -409,6 +409,13 @@ body {
 }
 
 .rate-period {
+    font-size: 0.85em;
+    color: #666;
+    display: block;
+    margin-top: 3px;
+}
+
+.qty-unit {
     font-size: 0.85em;
     color: #666;
 }
@@ -502,4 +509,18 @@ body {
     .quote-main {
         width: 100%;
     }
+}
+
+/* PDF Export Mode - removes top whitespace and borders during export */
+.pdf-mode body {
+    padding: 0 !important;
+}
+
+.pdf-mode #quotePreview {
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.pdf-mode .quote-layout {
+    height: 11in !important; /* Fill full letter page height to avoid top/bottom gaps */
 }

@@ -40,13 +40,13 @@
                 <div id="itemsContainer">
                     <div class="item-row">
                         <input type="text" class="item-description" placeholder="Name" oninput="updatePreview()">
-                        <input type="number" class="item-quantity" placeholder="QTY" min="0" step="0.01" oninput="updatePreview()">
+                        <input type="text" class="item-quantity" placeholder="QTY" inputmode="decimal" oninput="updatePreview()">
                         <select class="item-qty-unit" onchange="updatePreview()">
                             <option value="">None</option>
                             <option value="GBs">GBs</option>
                             <option value="TBs">TBs</option>
                         </select>
-                        <input type="number" class="item-price" placeholder="Rate" min="0.01" step="0.01" oninput="updatePreview()">
+                        <input type="text" class="item-price" placeholder="Rate" inputmode="decimal" oninput="updatePreview()">
                         <select class="item-display-mode" onchange="updatePreview()">
                             <option value="number">calc</option>
                             <option value="tbd">TBD</option>
