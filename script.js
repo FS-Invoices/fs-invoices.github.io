@@ -30,6 +30,7 @@ function addItem() {
             <option value="">None</option>
             <option value="GBs">GBs</option>
             <option value="TBs">TBs</option>
+            <option value="per user">per user</option>
         </select>
         <input type="text" class="item-price" placeholder="Rate" inputmode="decimal" oninput="updatePreview()">
         <select class="item-display-mode" onchange="updatePreview()">
@@ -69,7 +70,7 @@ function formatCurrency(amount, period = '') {
 }
 
 function formatRate(amount, period = '') {
-    // Format rate with GBs suffix
+    // Format rate with optional period suffix
     const rateValue = parseFloat(amount || 0);
     if (rateValue === 0) return '$0';
     
@@ -123,7 +124,7 @@ function updatePreview() {
             }
             
             const qtyUnit = row.querySelector('.item-qty-unit')?.value || '';
-            const period = '/month'; // Always use /month
+            const period = qtyUnit === 'per user' ? '/user/month' : '/month';
             const displayMode = row.querySelector('.item-display-mode')?.value || 'number';
             
             // Calculate total based on display mode
